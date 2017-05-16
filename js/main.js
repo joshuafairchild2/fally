@@ -8,7 +8,9 @@ let GameState = {
   create: function() {
     this.cursors = this.game.input.keyboard.createCursorKeys();
     this.HORIZONTAL_SPEED = 300;
-    this.SQUARE_LENGTH = 60;
+    this.SQUARE_WIDTH = 60;
+    this.SQUARE_HEIGHT = 15;
+    this.PLATFORM_VELOC = 200;
 
     this.game.physics.startSystem(Phaser.Physics.ARCADE);
     this.game.physics.arcade.gravity.y = 2000;
@@ -22,8 +24,7 @@ let GameState = {
 
     this.squares = this.game.add.group();
     this.squares.enableBody = true;
-
-    this.addRowOfSquares();
+    this.timer = game.time.events.loop(500, this.addRowOfSquares, this);
 
   },
 
@@ -50,19 +51,25 @@ let GameState = {
     this.game.physics.arcade.enable(square);
 
     // square.enableBody = true;
-    square.width = this.SQUARE_LENGTH;
-    square.height = this.SQUARE_LENGTH / 2;
+    square.width = this.SQUARE_WIDTH;
+    square.height = this.SQUARE_HEIGHT;
     square.body.immovable = true;
     square.body.allowGravity = false;
-    square.body.velocity.y = -200;
+    square.body.velocity.y = -this.PLATFORM_VELOC;
+    square.checkWorldBounds = true;
+    square.outOfBoundsKill = true;
   },
 
   addRowOfSquares: function() {
-    let hole = Math.floor(Math.random() * 6) + 2;
+    let hole = Math.floor(Math.random() * 6) + 1;
+    while (hole === this.lastHole) {
+      hole = Math.floor(Math.random() * 6 + 1);
+    }
+    this.lastHole = hole;
 
-    for (let i = 0; i < this.game.width / this.SQUARE_LENGTH; i++) {
+    for (let i = 0; i < this.game.width / this.SQUARE_WIDTH; i++) {
       if (i != hole) {
-        this.addSquare(i * this.SQUARE_LENGTH, 500);
+        this.addSquare(i * this.SQUARE_WIDTH, this.game.height - this.SQUARE_HEIGHT);
       }
     }
   }
